@@ -9,9 +9,9 @@ class Forecast {
   factory Forecast.fromJson(Map<String, dynamic> json) {
     return Forecast(
       dateTime: DateTime.parse(json['dt_txt']),
-      temperature: json['main']['temp'],
-      description: json['weather'][0]['description'],
-      icon: json['weather'][0]['icon'],
+      temperature: double.parse((json['main']['temp']??'').toString()) ,
+      description: json['weather'][0]['description'] ?? '',
+      icon: json['weather'][0]['icon'] ??'',
     );
   }
 }

@@ -9,10 +9,11 @@ class GeocodingService {
 
   Future<List<City>> getCities(String cityName) async {
     final response = await http.get(
-      Uri.parse('http://api.openweathermap.org/geo/1.0/direct?q=$cityName&limit=5&appid=$apiKey'),
+      Uri.parse('http://api.openweathermap.org/geo/1.0/direct?q=$cityName&limit=3&appid=$apiKey'),
     );
 
     if (response.statusCode == 200) {
+      print(response.body);
       List<dynamic> data = json.decode(response.body);
       return data.map((cityJson) => City.fromJson(cityJson)).toList();
     } else {

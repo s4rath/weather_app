@@ -4,37 +4,79 @@ import '../models/city.dart';
 import '../provider/city_provider.dart';
 import '../provider/weather_provider.dart';
 
+class CitySearchDropdown extends StatefulWidget {
+  @override
+  _CitySearchDropdownState createState() => _CitySearchDropdownState();
+}
 
-class CitySearchDropdown extends StatelessWidget {
+class _CitySearchDropdownState extends State<CitySearchDropdown> {
+  TextEditingController _controller = TextEditingController();
+   bool _isTextFieldEmpty = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      setState(() {
+        _isTextFieldEmpty = _controller.text.isEmpty;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        TextField(
-          decoration: InputDecoration(hintText: 'Enter city name'),
-          onChanged: (value) {
-            if (value.isNotEmpty) {
-              Provider.of<CityProvider>(context, listen: false).searchCity(value);
-            }
-          },
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              hintText: 'Enter city name',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              suffixIcon: IconButton(
+                icon: Icon(_isTextFieldEmpty ? Icons.search : Icons.clear),
+                onPressed: () {
+                   if (!_isTextFieldEmpty) {
+                    _controller.clear();
+                    Provider.of<CityProvider>(context, listen: false).clearCities();
+                  }
+                },
+              ),
+            ),
+            onChanged: (value) {
+              if (value.isEmpty) {
+                Provider.of<CityProvider>(context, listen: false).clearCities();
+              } else {
+                Provider.of<CityProvider>(context, listen: false).searchCity(value);
+              }
+            },
+          ),
         ),
         Consumer<CityProvider>(
           builder: (context, cityProvider, child) {
-            return cityProvider.cities.isEmpty
-                ? Container()
-                : DropdownButton<City>(
-                    items: cityProvider.cities.map((City city) {
-                      return DropdownMenuItem<City>(
-                        value: city,
-                        child: Text('${city.name}, ${city.state}, ${city.country}'),
-                      );
-                    }).toList(),
-                    onChanged: (City? city) {
-                      if (city != null) {
-                        Provider.of<WeatherProvider>(context, listen: false).fetchWeather(city.lat, city.lon);
-                      }
+            if (cityProvider.cities.isEmpty) {
+              return Container();
+            } else {
+              return ListView.builder(
+                // physics: AlwaysScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: cityProvider.cities.length,
+                itemBuilder: (context, index) {
+                  final city = cityProvider.cities[index];
+                  return ListTile(
+                    title: Text('${city.name}, ${city.state}, ${city.country}'),
+                    onTap: () {
+                      Provider.of<WeatherProvider>(context, listen: false).fetchWeather(city.lat, city.lon);
+                      Provider.of<CityProvider>(context, listen: false).clearCities();
+                      // _controller.clear();
                     },
                   );
+                },
+              );
+            }
           },
         ),
       ],

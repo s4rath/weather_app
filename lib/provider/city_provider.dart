@@ -12,4 +12,9 @@ class CityProvider with ChangeNotifier {
     _cities = await _geocodingService.getCities(cityName);
     notifyListeners();
   }
+
+  void clearCities() {
+    _cities = [];
+    notifyListeners();
+  }
 }

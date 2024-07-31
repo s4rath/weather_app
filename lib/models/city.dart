@@ -9,11 +9,11 @@ class City {
 
   factory City.fromJson(Map<String, dynamic> json) {
     return City(
-      name: json['name'],
-      country: json['country'],
+      name: json['name']??'',
+      country: json['country']??'',
       state: json['state'] ?? '',
-      lat: json['lat'],
-      lon: json['lon'],
+      lat: double.parse(json['lat'].toString()),
+      lon: double.parse(json['lon'].toString()),
     );
   }
 }

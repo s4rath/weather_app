@@ -8,10 +8,10 @@ class CurrentWeather {
 
   factory CurrentWeather.fromJson(Map<String, dynamic> json) {
     return CurrentWeather(
-      temperature: json['main']['temp'],
-      feelsLike: json['main']['feels_like'],
-      description: json['weather'][0]['description'],
-      icon: json['weather'][0]['icon'],
+      temperature: double.parse((json['main']['temp']??'').toString()),
+      feelsLike: double.parse((json['main']['feels_like']??'').toString()),
+      description: json['weather'][0]['description']??'',
+      icon: json['weather'][0]['icon']??'',
     );
   }
 }

@@ -15,6 +15,7 @@ class WeatherService {
     );
 
     if (response.statusCode == 200) {
+      print(response.body);
       return CurrentWeather.fromJson(json.decode(response.body));
     } else {
       throw Exception('Failed to load current weather');
