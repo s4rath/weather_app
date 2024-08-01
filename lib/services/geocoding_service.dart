@@ -13,7 +13,7 @@ class GeocodingService {
     );
 
     if (response.statusCode == 200) {
-      print(response.body);
+      // print(response.body);
       List<dynamic> data = json.decode(response.body);
       return data.map((cityJson) => City.fromJson(cityJson)).toList();
     } else {

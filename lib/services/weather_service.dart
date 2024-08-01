@@ -40,11 +40,11 @@ class WeatherService {
 
     if (response.statusCode == 200) {
       List<dynamic> data = json.decode(response.body)['list'];
-      data.forEach((forecastJson) {
+      for (var forecastJson in data) {
         forecastJson['main']['temp'] =
             (forecastJson['main']['temp'] - 273.15).toStringAsFixed(2);
-      });
-      print(data);
+      }
+      // print(data);
       return data
           .map((forecastJson) => Forecast.fromJson(forecastJson))
           .toList();

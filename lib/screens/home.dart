@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:weather_app/models/current_weather.dart';
+import 'package:intl/intl.dart';
 import '../provider/weather_provider.dart';
 import '../widgets/search.dart';
+import 'package:shimmer/shimmer.dart';
 
 class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? country;
-  String? city;
-
   @override
   void initState() {
     super.initState();
-    loadData();
+    Future.microtask(() => loadData());
   }
 
   loadData() async {
@@ -28,7 +27,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather App', style: TextStyle(color: Colors.white)),
+        title: const Text('Weather App', style: TextStyle(color: Colors.white)),
         backgroundColor: Colors.blueAccent,
       ),
       body: Consumer<WeatherProvider>(
@@ -37,8 +36,64 @@ class _HomePageState extends State<HomePage> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                CitySearchDropdown(),
-                if (weatherProvider.currentWeather != null)
+                const CitySearchDropdown(),
+                //if loading it shows shimmer
+                  if (weatherProvider.isLoading)
+                  Shimmer.fromColors(
+                    baseColor: Colors.grey[300]!,
+                    highlightColor: Colors.grey[100]!,
+                    child: Column(
+                      children: [
+                        Card(
+                          color: Colors.grey[300],
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width: double.infinity,
+                                  height: 20.0,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width: double.infinity,
+                                  height: 20.0,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width: double.infinity,
+                                  height: 20.0,
+                                  color: Colors.white,
+                                ),
+                                const SizedBox(height: 10.0),
+                                Container(
+                                  width: double.infinity,
+                                  height: 50.0,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  //if not loading and weather null then
+                if (weatherProvider.currentWeather == null &&
+                    (weatherProvider.forecast == null ||
+                        weatherProvider.forecast!.isEmpty)&&!weatherProvider.isLoading)
+                  const Expanded(
+                    child: Center(
+                      child: Text(
+                        'No weather data available. Please search for a city.',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                if (weatherProvider.currentWeather != null && !weatherProvider.isLoading)
                   Card(
                     color: Colors.blue.shade50,
                     child: Padding(
@@ -47,22 +102,23 @@ class _HomePageState extends State<HomePage> {
                         children: [
                           Text(
                             'Current Weather in ${weatherProvider.currentWeather!.city}, ${weatherProvider.currentWeather!.country}',
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
                           Text(
                               'Temperature: ${weatherProvider.currentWeather!.temperature}°C',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 20, fontWeight: FontWeight.bold)),
                           Text(
                               'Feels Like: ${weatherProvider.currentWeather!.feelsLike}°C',
-                              style: TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 16)),
                           Text(
                               'Description: ${weatherProvider.currentWeather!.description}',
-                              style: TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 16)),
                           Text(
                               'Humidity: ${weatherProvider.currentWeather!.humidity}%',
-                              style: TextStyle(fontSize: 16)),
+                              style: const TextStyle(fontSize: 16)),
+                              //icon from the assets/images/
                           Image.asset(
                               'assets/images/${weatherProvider.currentWeather!.icon}.png',
                               width: 50,
@@ -71,28 +127,31 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                   ),
-                if (weatherProvider.forecast != null)
+                if (weatherProvider.forecast != null &&
+                    weatherProvider.forecast!.isNotEmpty && !weatherProvider.isLoading)
                   Expanded(
                     child: ListView.builder(
                       itemCount: weatherProvider.forecast!.length,
                       itemBuilder: (context, index) {
                         final forecast = weatherProvider.forecast![index];
+                        final formattedDateTime = DateFormat('yyyy-MM-dd HH:mm')
+                            .format(forecast.dateTime);
                         return Card(
                           child: ListTile(
                             leading: Image.asset(
                                 'assets/images/${forecast.icon}.png',
                                 width: 50,
                                 height: 50),
-                            title: Text(forecast.dateTime.toString()),
+                            title: Text(formattedDateTime),
                             subtitle: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Temp: ${forecast.temperature}°C',
-                                    style: TextStyle(fontSize: 16)),
+                                    style: const TextStyle(fontSize: 16)),
                                 Text('Desc: ${forecast.description}',
-                                    style: TextStyle(fontSize: 14)),
+                                    style: const TextStyle(fontSize: 14)),
                                 Text('Humidity: ${forecast.humidity}%',
-                                    style: TextStyle(fontSize: 14)),
+                                    style: const TextStyle(fontSize: 14)),
                               ],
                             ),
                           ),

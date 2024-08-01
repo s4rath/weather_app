@@ -8,17 +8,26 @@ class WeatherProvider with ChangeNotifier {
   final WeatherService _weatherService = WeatherService();
   CurrentWeather? _currentWeather;
   List<Forecast>? _forecast;
+  bool _isLoading = false;
 
   CurrentWeather? get currentWeather => _currentWeather;
   List<Forecast>? get forecast => _forecast;
+  bool get isLoading => _isLoading;
+
+  _setLoading(bool value) {
+    _isLoading = value;
+    notifyListeners();
+  }
 
   Future<void> fetchWeather(double lat, double lon, {String? city, String? country}) async {
+    _setLoading(true);
+    //fetch data from apiservices
     _currentWeather = await _weatherService.getCurrentWeather(lat, lon);
     _forecast = await _weatherService.getForecast(lat, lon);
 
-    notifyListeners();
+    _setLoading(false);
     
-
+    //stored in database
     if (city != null && country != null) {
       await WeatherDatabase.instance.deleteWeather();
       await WeatherDatabase.instance.deleteForecast();
@@ -48,6 +57,8 @@ class WeatherProvider with ChangeNotifier {
   }
 
   Future<void> loadSavedData() async {
+    _setLoading(true);
+    //loading data from database
     final weatherData = await WeatherDatabase.instance.fetchWeather();
     final forecastData = await WeatherDatabase.instance.fetchForecast();
 
@@ -73,6 +84,6 @@ class WeatherProvider with ChangeNotifier {
       );
     }).toList();
 
-    notifyListeners();
+    _setLoading(false);
   }
 }
