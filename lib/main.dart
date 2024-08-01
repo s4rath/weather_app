@@ -6,6 +6,7 @@ import 'provider/weather_provider.dart';
 import 'screens/home.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); 
   await dotenv.load(fileName: '.env');
   runApp( MultiProvider(
       providers: [

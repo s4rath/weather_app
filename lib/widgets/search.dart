@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/city.dart';
 import '../provider/city_provider.dart';
 import '../provider/weather_provider.dart';
@@ -61,15 +62,22 @@ class _CitySearchDropdownState extends State<CitySearchDropdown> {
               return Container();
             } else {
               return ListView.builder(
-                // physics: AlwaysScrollableScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: cityProvider.cities.length,
                 itemBuilder: (context, index) {
                   final city = cityProvider.cities[index];
                   return ListTile(
                     title: Text('${city.name}, ${city.state}, ${city.country}'),
-                    onTap: () {
-                      Provider.of<WeatherProvider>(context, listen: false).fetchWeather(city.lat, city.lon);
+                    onTap: () async {
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.setString('city', city.name);
+                      prefs.setString('country', city.country);
+                      Provider.of<WeatherProvider>(context, listen: false).fetchWeather(
+                        city.lat,
+                        city.lon,
+                        city: city.name,
+                        country: city.country,
+                      );
                       Provider.of<CityProvider>(context, listen: false).clearCities();
                       // _controller.clear();
                     },
